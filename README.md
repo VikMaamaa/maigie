@@ -2,7 +2,7 @@
 
 ### *Your personal AI-driven learning assistant*
 
-Maigie is an AI-first study companion that helps students organize learning, generate courses, plan schedules, set goals, track progress, and access personalized resources—all through natural conver[...] 
+Maigie is an AI-first study companion that helps students organize learning, generate courses, plan schedules, set goals, track progress, and access personalized resources—all through natural conversations (text + voice).
 
 This repository is a **monorepo** managed using **Nx**, containing:
 
