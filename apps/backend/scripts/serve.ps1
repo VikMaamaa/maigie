@@ -43,10 +43,11 @@ try {
         exit 1
     }
 } catch {
-    Write-Host "Error starting server: $_" -ForegroundColor Red
+    Write-Host "`nError starting server: $_" -ForegroundColor Red
     Stop-ServerProcesses
     exit 1
 } finally {
+    # Cleanup on script exit (when Ctrl+C is pressed or server crashes)
     Stop-ServerProcesses
 }
 
