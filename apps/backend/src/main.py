@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .core.cache import cache
 from .core.database import db
+from .core.websocket import manager as websocket_manager
 from .dependencies import SettingsDep
 from .exceptions import (
     AppException,
@@ -17,6 +18,7 @@ from .exceptions import (
 )
 from .middleware import LoggingMiddleware, SecurityHeadersMiddleware
 from .routes.auth import router as auth_router
+from .routes.realtime import router as realtime_router
 
 
 @asynccontextmanager
@@ -34,10 +36,24 @@ async def lifespan(app: FastAPI):
     await cache.connect()
     print("Cache connection initialized")
 
+    # Initialize WebSocket manager
+    settings = get_settings()
+    websocket_manager.heartbeat_interval = settings.WEBSOCKET_HEARTBEAT_INTERVAL
+    websocket_manager.heartbeat_timeout = settings.WEBSOCKET_HEARTBEAT_TIMEOUT
+    websocket_manager.max_reconnect_attempts = settings.WEBSOCKET_MAX_RECONNECT_ATTEMPTS
+    await websocket_manager.start_heartbeat()
+    await websocket_manager.start_cleanup()
+    print("WebSocket manager initialized")
+
     yield
 
     # Shutdown
     print("Shutting down...")
+    await websocket_manager.stop_heartbeat()
+    await websocket_manager.stop_cleanup()
+    # Disconnect all WebSocket connections
+    for connection_id in list(websocket_manager.active_connections.keys()):
+        await websocket_manager.disconnect(connection_id, reason="server_shutdown")
     await cache.disconnect()
     await db.disconnect()
     print("Shutdown complete")
@@ -104,6 +120,7 @@ def create_app() -> FastAPI:
 
     # Include routers
     app.include_router(auth_router)
+    app.include_router(realtime_router)
 
     return app
 

@@ -106,15 +106,18 @@ poetry run pytest
 ### Core Utilities (`src/core/`)
 - `core/security.py` - JWT utilities, password hashing (bcrypt)
 - `core/oauth.py` - OAuth provider base structure (Google, GitHub)
+- `core/websocket.py` - WebSocket connection manager and event broadcasting
 - `core/database.py` - Database connection manager (placeholder for Prisma)
 - `core/cache.py` - Cache connection manager (placeholder for Redis)
 
 ### Feature Modules
 - `src/routes/` - API route handlers
   - `routes/auth.py` - Authentication routes (login, register, OAuth)
+  - `routes/realtime.py` - WebSocket routes for real-time updates
 - `src/services/` - Business logic
 - `src/models/` - Pydantic schemas and ORM models
   - `models/auth.py` - Authentication models (UserRegister, UserLogin, TokenResponse, etc.)
+  - `models/websocket.py` - WebSocket message models
 - `src/db/` - Database connection and migrations
 - `src/tasks/` - Background tasks (Celery/Dramatiq)
 - `src/ai_client/` - LLM and embeddings clients
@@ -125,6 +128,7 @@ poetry run pytest
 - `tests/` - Test files
 - `verify_setup.py` - Application setup verification script
 - `verify_auth.py` - Authentication framework verification script
+- `verify_websocket.py` - WebSocket framework verification script (run `.venv\Scripts\python.exe verify_websocket.py`)
 
 ## Application Setup Status
 
@@ -133,6 +137,29 @@ poetry run pytest
 ✅ **Environment configuration works correctly** - Pydantic Settings with .env support  
 ✅ **Dependency injection system works** - FastAPI Depends pattern implemented  
 ✅ **Middleware stack is configured** - Logging, Security Headers, and CORS middleware
+
+## WebSocket Framework Status
+
+✅ **WebSocket server runs** - Endpoint available at `/api/v1/realtime/ws`  
+✅ **Connection manager works** - Tracks connections, users, and channels  
+✅ **Event broadcasting framework works** - Broadcast to all/users/channels  
+✅ **Reconnection handling utilities work** - Tracks reconnection attempts  
+✅ **Heartbeat mechanism works** - Automatic ping/pong with timeout detection
+
+### Testing WebSocket Framework
+
+Run the verification script:
+
+```bash
+# Using virtual environment
+.venv\Scripts\python.exe verify_websocket.py
+
+# Or using Poetry
+poetry run python verify_websocket.py
+
+# Or using PowerShell script
+powershell -ExecutionPolicy Bypass -File scripts\verify-websocket.ps1
+```
 
 ## Authentication Framework Status
 

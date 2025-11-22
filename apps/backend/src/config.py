@@ -80,6 +80,11 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FORMAT: str = "json"
 
+    # WebSocket
+    WEBSOCKET_HEARTBEAT_INTERVAL: int = 30  # seconds
+    WEBSOCKET_HEARTBEAT_TIMEOUT: int = 60  # seconds
+    WEBSOCKET_MAX_RECONNECT_ATTEMPTS: int = 5
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
