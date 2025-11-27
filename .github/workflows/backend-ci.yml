@@ -484,21 +484,94 @@ jobs:
             docker load < /tmp/production-image.tar.gz
             rm /tmp/production-image.tar.gz
             
-            # Update environment variables
-            export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
-            export REDIS_URL="redis://redis:6379/0"
-            export ENVIRONMENT="production"
+            # Tag the loaded image for docker-compose (if needed)
+            docker tag maigie-backend:latest maigie-backend:latest || true
             
-            # Update docker-compose.yml with environment variables
+            # Update docker-compose.yml to use image instead of build
+            # Backup original if it exists
+            if [ -f docker-compose.yml ]; then
+              cp docker-compose.yml docker-compose.yml.backup
+            fi
+            
+            # Create docker-compose.yml with image references
+            cat > docker-compose.yml << 'EOF'
+            services:
+              redis:
+                image: redis:7-alpine
+                container_name: maigie-redis-prod
+                restart: unless-stopped
+                volumes:
+                  - redis_data:/data
+                healthcheck:
+                  test: ["CMD", "redis-cli", "ping"]
+                  interval: 10s
+                  timeout: 3s
+                  retries: 5
+                networks:
+                  - maigie_network
+            
+              celery-worker:
+                image: maigie-backend:latest
+                container_name: maigie-celery-worker-prod
+                restart: unless-stopped
+                env_file:
+                  - .env
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: celery -A src.core.celery_app worker --loglevel=info
+            
+              celery-beat:
+                image: maigie-backend:latest
+                container_name: maigie-celery-beat-prod
+                restart: unless-stopped
+                env_file:
+                  - .env
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: celery -A src.core.celery_app beat --loglevel=info
+            
+              backend:
+                image: maigie-backend:latest
+                container_name: maigie-backend-prod
+                restart: unless-stopped
+                env_file:
+                  - .env
+                ports:
+                  - "8000:8000"
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: >
+                  sh -c "
+                    prisma migrate deploy &&
+                    uvicorn src.main:app --host 0.0.0.0 --port 8000
+                  "
+            
+            volumes:
+              redis_data:
+            
+            networks:
+              maigie_network:
+                driver: bridge
+            EOF
+            
+            # Update .env file
             cat > .env << EOF
             DATABASE_URL=${{ secrets.PRODUCTION_DATABASE_URL }}
             REDIS_URL=redis://redis:6379/0
             ENVIRONMENT=production
             EOF
             
-            # Deploy
-            docker-compose pull || true
-            docker-compose up -d --build
+            # Stop existing containers
+            docker-compose down || true
+            
+            # Deploy (no build needed, using pre-loaded image)
+            docker-compose up -d
             
             # Wait for services to be ready
             sleep 15
@@ -552,28 +625,107 @@ jobs:
             docker load < /tmp/staging-image.tar.gz
             rm /tmp/staging-image.tar.gz
             
+            # Tag the loaded image for docker-compose (if needed)
+            docker tag maigie-backend:staging maigie-backend:staging || true
+            
             # Update environment variables
             export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
             export REDIS_URL="redis://redis:6379/0"
             export ENVIRONMENT="staging"
             
-            # Update docker-compose.yml with environment variables
+            # Update docker-compose.yml to use image instead of build
+            # Backup original if it exists
+            if [ -f docker-compose.yml ]; then
+              cp docker-compose.yml docker-compose.yml.backup
+            fi
+            
+            # Create docker-compose.yml with image references
+            cat > docker-compose.yml << 'EOF'
+            services:
+              redis:
+                image: redis:7-alpine
+                container_name: maigie-redis-staging
+                restart: unless-stopped
+                volumes:
+                  - redis_data:/data
+                healthcheck:
+                  test: ["CMD", "redis-cli", "ping"]
+                  interval: 10s
+                  timeout: 3s
+                  retries: 5
+                networks:
+                  - maigie_network
+            
+              celery-worker:
+                image: maigie-backend:staging
+                container_name: maigie-celery-worker-staging
+                restart: unless-stopped
+                env_file:
+                  - .env
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: celery -A src.core.celery_app worker --loglevel=info
+            
+              celery-beat:
+                image: maigie-backend:staging
+                container_name: maigie-celery-beat-staging
+                restart: unless-stopped
+                env_file:
+                  - .env
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: celery -A src.core.celery_app beat --loglevel=info
+            
+              backend:
+                image: maigie-backend:staging
+                container_name: maigie-backend-staging
+                restart: unless-stopped
+                env_file:
+                  - .env
+                ports:
+                  - "8001:8000"
+                depends_on:
+                  - redis
+                networks:
+                  - maigie_network
+                command: >
+                  sh -c "
+                    prisma migrate deploy &&
+                    python prisma/seed.py &&
+                    uvicorn src.main:app --host 0.0.0.0 --port 8000
+                  "
+            
+            volumes:
+              redis_data:
+            
+            networks:
+              maigie_network:
+                driver: bridge
+            EOF
+            
+            # Update .env file
             cat > .env << EOF
             DATABASE_URL=${{ secrets.STAGING_DATABASE_URL }}
             REDIS_URL=redis://redis:6379/0
             ENVIRONMENT=staging
             EOF
             
-            # Deploy
-            docker-compose pull || true
-            docker-compose up -d --build
+            # Stop existing containers
+            docker-compose down || true
+            
+            # Deploy (no build needed, using pre-loaded image)
+            docker-compose up -d
             
             # Wait for services to be ready
             sleep 15
             
             # Run migrations and seed
             docker-compose exec -T backend prisma migrate deploy || echo "Migrations already applied"
-            docker-compose exec -T backend prisma db seed || echo "Seed already applied"
+            docker-compose exec -T backend python prisma/seed.py || echo "Seed already applied"
             
             echo "Staging deployment complete!"
 
