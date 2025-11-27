@@ -673,7 +673,7 @@ jobs:
           # Cleanup VPS resources
           ssh -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            "cd /opt/maigie/previews && \
+            bash -c "cd /opt/maigie/previews && \
             if [ -d \"${PREVIEW_ID}\" ]; then \
               cd ${PREVIEW_ID} && \
               docker-compose down -v 2>/dev/null || true && \
@@ -683,7 +683,8 @@ jobs:
               rm -rf ${PREVIEW_ID} && \
               sudo rm -f /www/server/panel/vhost/nginx/${PREVIEW_ID}.preview.conf && \
               sudo nginx -t && sudo systemctl reload nginx 2>/dev/null || true && \
-              echo '✓ Cleaned up preview environment' \
+              docker rmi maigie-backend-preview:${PREVIEW_ID} 2>/dev/null || true && \
+              echo '✓ Cleaned up preview environment'; \
             fi"
 
       - name: Comment on PR
