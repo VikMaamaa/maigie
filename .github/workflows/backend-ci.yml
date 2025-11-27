@@ -456,16 +456,20 @@ jobs:
 
       - name: Save Docker Image
         run: |
-          docker save maigie-backend:latest | gzip > /tmp/production-image.tar.gz
+          docker save maigie-backend:latest | gzip > production-image.tar.gz
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/vps_key
+          chmod 600 ~/.ssh/vps_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Contabo VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "/tmp/production-image.tar.gz"
-          target: "/tmp/"
+        run: |
+          scp -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
+            production-image.tar.gz \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/production-image.tar.gz
 
       - name: Load Image and Deploy Production
         uses: appleboy/ssh-action@v1.0.0
@@ -520,16 +524,20 @@ jobs:
 
       - name: Save Docker Image
         run: |
-          docker save maigie-backend:staging | gzip > /tmp/staging-image.tar.gz
+          docker save maigie-backend:staging | gzip > staging-image.tar.gz
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/vps_key
+          chmod 600 ~/.ssh/vps_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Contabo VPS
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          source: "/tmp/staging-image.tar.gz"
-          target: "/tmp/"
+        run: |
+          scp -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
+            staging-image.tar.gz \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/staging-image.tar.gz
 
       - name: Load Image and Deploy Staging
         uses: appleboy/ssh-action@v1.0.0
