@@ -1,7 +1,7 @@
 """
 Authentication routes (JWT Signup/Login + OAuth Placeholders).
 
-Copyright (C) 2024 Maigie Team
+Copyright (C) 2025 Maigie
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published
@@ -44,6 +44,9 @@ from src.models.auth import (
     UserSignup,
 )
 from src.services.user_service import OAuthUserInfo, get_or_create_oauth_user
+
+# Get logger for this module
+logger = logging.getLogger(__name__)
 
 # Get logger for this module
 logger = logging.getLogger(__name__)
