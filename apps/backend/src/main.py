@@ -1,4 +1,5 @@
 # apps/backend/src/main.py
+# apps/backend/src/main.py
 # Maigie - AI-powered student companion
 # Copyright (C) 2025 Maigie
 
