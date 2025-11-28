@@ -17,7 +17,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 # --- Token Schemas ---
 
@@ -63,6 +63,8 @@ class UserPreferencesResponse(BaseModel):
     language: str
     notifications: bool
 
+    model_config = ConfigDict(from_attributes=True)
+
 
 class UserResponse(BaseModel):
     """User response schema."""
@@ -74,8 +76,15 @@ class UserResponse(BaseModel):
     isActive: bool  # noqa: N815
     preferences: UserPreferencesResponse | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+    @field_validator("tier", mode="before")
+    @classmethod
+    def convert_tier_to_string(cls, v):
+        """Convert Tier enum to string if needed."""
+        if hasattr(v, "value"):
+            return v.value
+        return str(v)
 
 
 class OAuthAuthorizeResponse(BaseModel):
