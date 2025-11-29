@@ -379,12 +379,8 @@ jobs:
               echo "$UPDATE_RESPONSE" | jq '.' || true
             fi
             
-            # Get tunnel hostname for DNS record target
-            TUNNEL_HOSTNAME=$(curl -s -X GET \
-              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-              -H "Content-Type: application/json" \
-              "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/cfd_tunnel/${{ secrets.CLOUDFLARE_TUNNEL_ID }}" | \
-              jq -r '.result.name + ".cfargotunnel.com"')
+            # Get tunnel hostname for DNS record target (use tunnel ID directly)
+            TUNNEL_HOSTNAME="${{ secrets.CLOUDFLARE_TUNNEL_ID }}.cfargotunnel.com"
             
             # Extract subdomain from preview domain (e.g., pr-44-api-preview from pr-44-api-preview.maigie.com)
             DNS_NAME=$(echo "${PREVIEW_DOMAIN}" | cut -d. -f1)
