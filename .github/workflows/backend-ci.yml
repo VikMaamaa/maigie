@@ -224,7 +224,7 @@ jobs:
                   - preview_net_${{ steps.preview.outputs.id }}
                 command: >
                   sh -c "
-                    prisma migrate deploy &&
+                    prisma db push &&
                     python prisma/seed.py &&
                     uvicorn src.main:app --host 0.0.0.0 --port 8000
                   "
@@ -561,7 +561,7 @@ jobs:
                   - maigie_network
                 command: >
                   sh -c "
-                    prisma migrate deploy &&
+                    prisma db push &&
                     uvicorn src.main:app --host 0.0.0.0 --port 8000
                   "
             
@@ -589,8 +589,8 @@ jobs:
             # Wait for services to be ready
             sleep 15
             
-            # Run migrations
-            docker-compose exec -T backend prisma migrate deploy || echo "Migrations already applied"
+            # Run db push
+            docker-compose exec -T backend prisma db push || echo "Schema push failed"
             
             echo "Production deployment complete!"
 
@@ -707,7 +707,7 @@ jobs:
                   - maigie_network
                 command: >
                   sh -c "
-                    prisma migrate deploy &&
+                    prisma db push &&
                     python prisma/seed.py &&
                     uvicorn src.main:app --host 0.0.0.0 --port 8000
                   "
@@ -736,8 +736,8 @@ jobs:
             # Wait for services to be ready
             sleep 15
             
-            # Run migrations and seed
-            docker-compose exec -T backend prisma migrate deploy || echo "Migrations already applied"
+            # Run db push and seed
+            docker-compose exec -T backend prisma db push || echo "Schema push failed"
             docker-compose exec -T backend python prisma/seed.py || echo "Seed already applied"
             
             echo "Staging deployment complete!"
