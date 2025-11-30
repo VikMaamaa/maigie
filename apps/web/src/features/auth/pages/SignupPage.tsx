@@ -1,0 +1,153 @@
+/**
+ * Signup page component
+ */
+
+import { useState, FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthForm } from '../components/AuthForm';
+import { AuthLogo } from '../components/AuthLogo';
+import { AuthInput } from '../components/AuthInput';
+import { PasswordInput } from '../components/PasswordInput';
+import { AuthButton } from '../components/AuthButton';
+import { GoogleOAuthButton } from '../components/GoogleOAuthButton';
+import { AuthDivider } from '../components/AuthDivider';
+import { useSignup } from '../hooks/useSignup';
+
+export function SignupPage() {
+  const navigate = useNavigate();
+  const signupMutation = useSignup();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Full name is required';
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      // Store email for OTP verification
+      localStorage.setItem('signup_email', formData.email);
+      await signupMutation.mutateAsync({
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      });
+    } catch (error: any) {
+      setErrors({
+        submit: error?.response?.data?.detail || 'An error occurred. Please try again.',
+      });
+    }
+  };
+
+  const handleGoogleSignup = () => {
+    // TODO: Implement Google OAuth
+    console.log('Google signup clicked');
+  };
+
+  return (
+    <AuthForm>
+      <AuthLogo />
+      <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        Create your account
+      </h1>
+
+      <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <AuthInput
+          id="name"
+          label="Full Name"
+          type="text"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          error={errors.name}
+          required
+        />
+
+        <AuthInput
+          id="email"
+          label="Email address"
+          type="email"
+          placeholder="Email address"
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+          error={errors.email}
+          required
+        />
+
+        <PasswordInput
+          id="password"
+          label="Password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+          error={errors.password}
+          required
+        />
+
+        {errors.submit && (
+          <div className="text-sm text-red-600 text-center" role="alert">
+            {errors.submit}
+          </div>
+        )}
+
+        <AuthButton
+          type="submit"
+          loading={signupMutation.isPending}
+          variant="primary"
+        >
+          Sign Up
+        </AuthButton>
+      </form>
+
+      <AuthDivider />
+
+      <GoogleOAuthButton onClick={handleGoogleSignup} />
+
+      <p className="mt-6 text-center text-sm text-gray-600">
+        Already have an account?{' '}
+        <Link to="/login" className="font-medium text-primary hover:text-primary/90">
+          Log in
+        </Link>
+      </p>
+    </AuthForm>
+  );
+}
+
