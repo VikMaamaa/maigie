@@ -13,8 +13,6 @@
     "expo-status-bar": "^3.0.8",
     "expo-system-ui": "^6.0.8",
     "jest-expo": "^54.0.13",
-    "metro-config": "*",
-    "metro-resolver": "*",
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-svg": "15.12.1",
