@@ -77,69 +77,71 @@ export function SignupPage() {
 
   return (
     <AuthForm>
-      <div className="flex flex-col items-center mb-6">
-        <AuthLogo />
-        <h1 className="text-3xl font-semibold text-charcoal mt-8">
-          Create your account
-        </h1>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <AuthInput
-          id="name"
-          type="text"
-          placeholder="Full Name"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          error={errors.name}
-          required
-        />
-
-        <AuthInput
-          id="email"
-          type="email"
-          placeholder="Email address"
-          value={formData.email}
-          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          error={errors.email}
-          required
-        />
-
-        <PasswordInput
-          id="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          error={errors.password}
-          required
-        />
-
-        {errors.submit && (
-          <div className="text-sm text-red-600 text-center" role="alert">
-            {errors.submit}
-          </div>
-        )}
-
-        <div className="pt-2">
-          <AuthButton
-            type="submit"
-            loading={signupMutation.isPending}
-            variant="primary"
-          >
-            Sign Up
-          </AuthButton>
+      <div className="flex flex-col flex-1">
+        <div className="flex flex-col items-center mb-6">
+          <AuthLogo />
+          <h1 className="text-3xl font-semibold text-charcoal mt-8">
+            Create your account
+          </h1>
         </div>
-      </form>
 
-      <div className="mt-4">
-        <AuthDivider />
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <AuthInput
+            id="name"
+            type="text"
+            placeholder="Full Name"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            error={errors.name}
+            required
+          />
+
+          <AuthInput
+            id="email"
+            type="email"
+            placeholder="Email address"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            error={errors.email}
+            required
+          />
+
+          <PasswordInput
+            id="password"
+            placeholder="Password"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            error={errors.password}
+            required
+          />
+
+          {errors.submit && (
+            <div className="text-sm text-red-600 text-center" role="alert">
+              {errors.submit}
+            </div>
+          )}
+
+          <div className="pt-2">
+            <AuthButton
+              type="submit"
+              loading={signupMutation.isPending}
+              variant="primary"
+            >
+              Sign Up
+            </AuthButton>
+          </div>
+        </form>
+
+        <div className="mt-4">
+          <AuthDivider />
+        </div>
+
+        <div className="mt-4">
+          <GoogleOAuthButton onClick={handleGoogleSignup} />
+        </div>
       </div>
 
-      <div className="mt-4">
-        <GoogleOAuthButton onClick={handleGoogleSignup} />
-      </div>
-
-      <p className="mt-5 text-center text-sm text-gray-600">
+      <p className="mt-auto text-center text-sm text-gray-600">
         Already have an account?{' '}
         <Link to="/login" className="font-medium text-primary hover:text-primary/90">
           Log in
