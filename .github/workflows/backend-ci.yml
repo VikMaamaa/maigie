@@ -85,6 +85,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate .env from .env.example for preview
+        env:
+          ENVIRONMENT: preview
+        run: |
+          chmod +x scripts/generate-env-from-secrets.sh
+          ./scripts/generate-env-from-secrets.sh .env .env.example
+
       - name: Generate Preview ID
         id: preview
         run: |
@@ -118,6 +125,14 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/vps_key
           chmod 600 ~/.ssh/vps_key
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Upload env template and generator for preview
+        run: |
+          scp -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
+            .env.example \
+            .env \
+            scripts/generate-env-from-secrets.sh \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/opt/maigie/previews/
 
       - name: Deploy to Contabo VPS
         run: |
@@ -163,6 +178,15 @@ jobs:
             # Create preview directory
             mkdir -p ${{ steps.preview.outputs.id }}
             cd ${{ steps.preview.outputs.id }}
+
+            # Prepare .env from template using generator script
+            if [ -f "../.env.example" ] && [ -f "../generate-env-from-secrets.sh" ]; then
+              cp ../.env.example .env.example
+              cp ../generate-env-from-secrets.sh ./generate-env-from-secrets.sh
+              chmod +x ./generate-env-from-secrets.sh
+              export ENVIRONMENT="preview"
+              export PREVIEW_ID="${{ steps.preview.outputs.id }}"
+            fi
             
             # Remove old preview image if it exists (force remove to handle any dangling references)
             docker rmi -f maigie-backend-preview:${{ steps.preview.outputs.id }} 2>/dev/null || true
@@ -173,6 +197,12 @@ jobs:
             
             # Generate random password for preview database
             POSTGRES_PASSWORD=$(openssl rand -hex 16)
+
+            # If generator is available, build DATABASE_URL and create .env
+            if [ -f "./generate-env-from-secrets.sh" ]; then
+              export DATABASE_URL="postgresql://maigie:${POSTGRES_PASSWORD}@postgres:5432/maigie_preview_${{ steps.preview.outputs.id }}"
+              ./generate-env-from-secrets.sh .env .env.example
+            fi
             
             # Create docker-compose.yml
             cat > docker-compose.yml << EOF
@@ -208,10 +238,9 @@ jobs:
               backend:
                 image: maigie-backend-preview:${{ steps.preview.outputs.id }}
                 container_name: maigie-preview-backend-${{ steps.preview.outputs.id }}
+                env_file:
+                  - .env
                 environment:
-                  DATABASE_URL: postgresql://maigie:${POSTGRES_PASSWORD}@postgres:5432/maigie_preview_${{ steps.preview.outputs.id }}
-                  REDIS_URL: redis://redis:6379/0
-                  ENVIRONMENT: preview
                   PREVIEW_ID: ${{ steps.preview.outputs.id }}
                 ports:
                   - "0:8000"
@@ -463,6 +492,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate .env from .env.example for production
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          ENVIRONMENT: production
+        run: |
+          chmod +x scripts/generate-env-from-secrets.sh
+          ./scripts/generate-env-from-secrets.sh .env .env.example
+
       - name: Build Docker Image
         working-directory: ./apps/backend
         run: docker build -t maigie-backend:latest .
@@ -481,8 +518,8 @@ jobs:
       - name: Deploy to Contabo VPS
         run: |
           scp -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
-            production-image.tar.gz \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/production-image.tar.gz
+            production-image.tar.gz .env \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/
 
       - name: Load Image and Deploy Production
         uses: appleboy/ssh-action@v1.0.0
@@ -496,6 +533,11 @@ jobs:
             # Load Docker image
             docker load < /tmp/production-image.tar.gz
             rm /tmp/production-image.tar.gz
+
+            # Update .env from uploaded file
+            if [ -f /tmp/.env ]; then
+              mv /tmp/.env .env
+            fi
             
             # Tag the loaded image for docker-compose (if needed)
             docker tag maigie-backend:latest maigie-backend:latest || true
@@ -604,6 +646,14 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Generate .env from .env.example for staging
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+          ENVIRONMENT: staging
+        run: |
+          chmod +x scripts/generate-env-from-secrets.sh
+          ./scripts/generate-env-from-secrets.sh .env .env.example
+
       - name: Build Docker Image
         working-directory: ./apps/backend
         run: docker build -t maigie-backend:staging .
@@ -622,8 +672,8 @@ jobs:
       - name: Deploy to Contabo VPS
         run: |
           scp -i ~/.ssh/vps_key -o StrictHostKeyChecking=no \
-            staging-image.tar.gz \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/staging-image.tar.gz
+            staging-image.tar.gz .env \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/tmp/
 
       - name: Load Image and Deploy Staging
         uses: appleboy/ssh-action@v1.0.0
@@ -637,14 +687,14 @@ jobs:
             # Load Docker image
             docker load < /tmp/staging-image.tar.gz
             rm /tmp/staging-image.tar.gz
+
+            # Update .env from uploaded file
+            if [ -f /tmp/.env ]; then
+              mv /tmp/.env .env
+            fi
             
             # Tag the loaded image for docker-compose (if needed)
             docker tag maigie-backend:staging maigie-backend:staging || true
-            
-            # Update environment variables
-            export DATABASE_URL="${{ secrets.STAGING_DATABASE_URL }}"
-            export REDIS_URL="redis://redis:6379/0"
-            export ENVIRONMENT="staging"
             
             # Update docker-compose.yml to use image instead of build
             # Backup original if it exists
