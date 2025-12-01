@@ -25,7 +25,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
         <input
           ref={ref}
           className={cn(
-            'w-full h-12 px-5 py-3 border',
+            'w-full h-12 px-4 py-2 border',
             'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
             'transition-colors duration-200',
             error

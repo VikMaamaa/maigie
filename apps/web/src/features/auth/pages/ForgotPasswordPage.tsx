@@ -51,7 +51,7 @@ export function ForgotPasswordPage() {
     return (
       <AuthForm>
         <AuthLogo />
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <h1 className="text-3xl font-semibold text-gray-900 mb-2 text-center">
           Check your email
         </h1>
         <p className="text-gray-600 text-center mb-8">
@@ -69,7 +69,7 @@ export function ForgotPasswordPage() {
   return (
       <AuthForm>
         <AuthLogo />
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 text-center">
+        <h1 className="text-3xl font-semibold text-gray-900 mb-2 text-center">
           Reset Password
         </h1>
         <p className="text-gray-600 text-center mb-8">

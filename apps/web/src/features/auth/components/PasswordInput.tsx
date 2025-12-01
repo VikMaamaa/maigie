@@ -31,7 +31,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
             ref={ref}
             type={showPassword ? 'text' : 'password'}
             className={cn(
-              'w-full h-12 px-5 py-3 pr-12 border',
+              'w-full h-12 px-4 py-2 pr-12 border',
               'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent',
               'transition-colors duration-200',
               error

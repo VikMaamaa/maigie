@@ -77,14 +77,14 @@ export function SignupPage() {
 
   return (
     <AuthForm>
-      <div className="flex flex-col items-center mb-8">
+      <div className="flex flex-col items-center mb-6">
         <AuthLogo />
-        <h1 className="text-3xl font-bold text-gray-900 mt-6">
+        <h1 className="text-3xl font-semibold text-charcoal mt-8">
           Create your account
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-2">
         <AuthInput
           id="name"
           type="text"
@@ -120,24 +120,26 @@ export function SignupPage() {
           </div>
         )}
 
-        <AuthButton
-          type="submit"
-          loading={signupMutation.isPending}
-          variant="primary"
-        >
-          Sign Up
-        </AuthButton>
+        <div className="pt-2">
+          <AuthButton
+            type="submit"
+            loading={signupMutation.isPending}
+            variant="primary"
+          >
+            Sign Up
+          </AuthButton>
+        </div>
       </form>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <AuthDivider />
       </div>
 
-      <div className="mt-6">
+      <div className="mt-4">
         <GoogleOAuthButton onClick={handleGoogleSignup} />
       </div>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
+      <p className="mt-5 text-center text-sm text-gray-600">
         Already have an account?{' '}
         <Link to="/login" className="font-medium text-primary hover:text-primary/90">
           Log in
