@@ -183,7 +183,7 @@ async def lifespan(app: FastAPI):
         placeholder_values = ["project-id", "your-project-id", "placeholder", "xxx", "your-dsn"]
         dsn_lower = sentry_dsn.lower()
         is_placeholder = any(placeholder in dsn_lower for placeholder in placeholder_values)
-        
+
         if is_placeholder:
             logger.warning("Sentry DSN appears to be a placeholder - error tracking disabled")
         else:
@@ -203,7 +203,9 @@ async def lifespan(app: FastAPI):
             except BadDsn as e:
                 logger.warning(f"Invalid Sentry DSN (non-critical): {e}. Error tracking disabled.")
             except Exception as e:
-                logger.warning(f"Failed to initialize Sentry (non-critical): {e}. Error tracking disabled.")
+                logger.warning(
+                    f"Failed to initialize Sentry (non-critical): {e}. Error tracking disabled."
+                )
     else:
         logger.warning("Sentry DSN not configured - error tracking disabled")
 
