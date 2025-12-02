@@ -33,6 +33,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthContext } from '../context/AuthContext';
 import Toast from 'react-native-toast-message';
+import { colors } from '../lib/colors';
 
 interface Props {
   email: string;
@@ -46,6 +47,7 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const { resetPassword } = useAuthContext();
 
   const handleReset = async () => {
@@ -76,7 +78,7 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
         text2: 'Password reset successfully. Please log in.',
       });
       onNavigate('login');
-    } catch (error) {
+    } catch {
       // Error handled in context
     } finally {
       setLoading(false);
@@ -106,12 +108,17 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
           <View style={styles.form}>
             <View style={styles.passwordContainer}>
               <TextInput
-                style={styles.passwordInput}
+                style={[
+                  styles.passwordInput,
+                  focusedInput === 'password' && styles.inputFocused,
+                ]}
                 placeholder="New Password"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.placeholder}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                onFocus={() => setFocusedInput('password')}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -120,19 +127,24 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
                 <Ionicons
                   name={showPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.text.placeholder}
                 />
               </TouchableOpacity>
             </View>
 
             <View style={styles.passwordContainer}>
               <TextInput
-                style={styles.passwordInput}
+                style={[
+                  styles.passwordInput,
+                  focusedInput === 'confirmPassword' && styles.inputFocused,
+                ]}
                 placeholder="Confirm New Password"
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={colors.text.placeholder}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
+                onFocus={() => setFocusedInput('confirmPassword')}
+                onBlur={() => setFocusedInput(null)}
               />
               <TouchableOpacity
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -141,7 +153,7 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off' : 'eye'}
                   size={20}
-                  color="#9CA3AF"
+                  color={colors.text.placeholder}
                 />
               </TouchableOpacity>
             </View>
@@ -152,7 +164,7 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
               disabled={loading}
             >
               {loading ? (
-                <ActivityIndicator color="#fff" />
+                <ActivityIndicator color={colors.text.white} />
               ) : (
                 <Text style={styles.primaryButtonText}>Reset Password</Text>
               )}
@@ -167,7 +179,7 @@ export const ResetPasswordScreen = ({ email, otp, onNavigate }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
@@ -192,18 +204,18 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#1F2937',
+    color: colors.text.secondary,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
+    color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: colors.text.tertiary,
     lineHeight: 24,
     textAlign: 'center',
   },
@@ -211,30 +223,34 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.input,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border.default,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#1F2937',
+    color: colors.text.secondary,
     marginBottom: 16,
+  },
+  inputFocused: {
+    borderColor: colors.border.active,
+    borderWidth: 2,
   },
   passwordContainer: {
     position: 'relative',
     marginBottom: 16,
   },
   passwordInput: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.input,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border.default,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingRight: 50,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#1F2937',
+    color: colors.text.secondary,
   },
   eyeIcon: {
     position: 'absolute',
@@ -243,19 +259,19 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   primaryButton: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: colors.primary.main,
     borderRadius: 24,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
-    shadowColor: '#4F46E5',
+    shadowColor: colors.primary.shadow,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
+    color: colors.text.white,
     fontSize: 16,
     fontWeight: '600',
   },

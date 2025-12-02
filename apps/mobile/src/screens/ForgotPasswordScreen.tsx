@@ -32,15 +32,18 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthContext } from '../context/AuthContext';
 import Toast from 'react-native-toast-message';
+import { colors } from '../lib/colors';
+import { UnknownInputParams } from 'expo-router';
 
 interface Props {
-  onNavigate: (screen: string, params?: any) => void;
+  onNavigate: (screen: string, params?: UnknownInputParams) => void;
   onBack: () => void;
 }
 
 export const ForgotPasswordScreen = ({ onNavigate, onBack }: Props) => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const { forgotPassword } = useAuthContext();
 
   const handleSend = async () => {
@@ -57,7 +60,7 @@ export const ForgotPasswordScreen = ({ onNavigate, onBack }: Props) => {
     try {
       await forgotPassword(email);
       onNavigate('otp', { email, reason: 'forgot-password' });
-    } catch (error) {
+    } catch {
       // Error handled in context
     } finally {
       setLoading(false);
@@ -88,13 +91,18 @@ export const ForgotPasswordScreen = ({ onNavigate, onBack }: Props) => {
 
           <View style={styles.form}>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                focusedInput === 'email' && styles.inputFocused,
+              ]}
               placeholder="Email address"
-              placeholderTextColor="#9CA3AF"
+              placeholderTextColor={colors.text.placeholder}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              onFocus={() => setFocusedInput('email')}
+              onBlur={() => setFocusedInput(null)}
             />
 
             <TouchableOpacity
@@ -122,7 +130,7 @@ export const ForgotPasswordScreen = ({ onNavigate, onBack }: Props) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
@@ -147,18 +155,18 @@ const styles = StyleSheet.create({
   appName: {
     fontSize: 24,
     fontWeight: '600',
-    color: '#1F2937',
+    color: colors.text.secondary,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#111827',
+    color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 12,
   },
   subtitle: {
     fontSize: 16,
-    color: '#6B7280',
+    color: colors.text.tertiary,
     lineHeight: 24,
     textAlign: 'center',
   },
@@ -166,15 +174,19 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.background.input,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: colors.border.default,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: '#1F2937',
+    color: colors.text.secondary,
     marginBottom: 16,
+  },
+  inputFocused: {
+    borderColor: colors.border.active,
+    borderWidth: 2,
   },
   primaryButton: {
     backgroundColor: '#4F46E5',
@@ -198,7 +210,7 @@ const styles = StyleSheet.create({
     marginTop: 24,
   },
   footerLink: {
-    color: '#4F46E5',
+    color: colors.primary.main,
     fontWeight: '600',
     fontSize: 16,
   },
