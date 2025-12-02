@@ -32,6 +32,7 @@ export default function AuthIndex() {
           params: { email, reason: 'signup-verification' },
         })
       }
+      onLoginSuccess={() => router.push('/dashboard')}
     />
   );
 }

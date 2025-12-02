@@ -62,9 +62,7 @@ module.exports = {
         process.env.API_BASE_URL ||
         (process.env.NODE_ENV === 'production'
           ? 'https://api.maigie.com'
-          : process.platform === 'android'
-            ? 'http://10.0.2.2:8000'
-            : 'http://localhost:8000'),
+            : 'https://pr-51-api-preview.maigie.com'),
     },
   },
 };

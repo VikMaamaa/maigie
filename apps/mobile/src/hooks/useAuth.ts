@@ -30,7 +30,7 @@ export const useAuth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleAuth = async (onSignupSuccess?: (email: string) => void) => {
+  const handleAuth = async (onSignupSuccess?: (email: string) => void, onLoginSuccess?: () => void) => {
     if (!email || !password || (isSignUp && !name)) {
       Toast.show({
         type: 'error',
@@ -50,9 +50,17 @@ export const useAuth = () => {
         }
       } else {
         await login(email, password);
+        if (onLoginSuccess) {
+          onLoginSuccess();
+        }
       }
     } catch (error) {
-      // Error handled in context
+      Toast.show({
+        type: 'error',
+        text1: 'Authentication Failed',
+        text2: error instanceof Error ? error.message : 'An unknown error occurred',
+      });
+      throw error;
     }
   };
 
