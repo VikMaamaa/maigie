@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { OtpScreen } from '../screens/OtpScreen';
+import { OtpScreen } from '../../screens/OtpScreen';
 
 type OtpParams = {
   email?: string | string[];
@@ -21,24 +21,23 @@ export default function OtpRoute() {
       onNavigate={(screen, params) => {
         if (screen === 'reset-password') {
           router.push({
-            pathname: '/reset-password',
+            pathname: '/auth/reset-password',
             params,
           });
         } else if (screen === 'login') {
-          router.replace('/');
+          router.replace('/auth');
         } else if (screen === 'forgot-password') {
-          router.replace('/forgot-password');
+          router.replace('/auth/forgot-password');
         }
       }}
       onBack={() => {
         if (reasonValue === 'signup-verification') {
-          router.replace('/');
+          router.replace('/auth');
         } else {
-          router.replace('/forgot-password');
+          router.replace('/auth/forgot-password');
         }
       }}
     />
   );
 }
-
 

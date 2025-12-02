@@ -1,6 +1,6 @@
 import React from 'react';
 import { useRouter } from 'expo-router';
-import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen';
+import { ForgotPasswordScreen } from '../../screens/ForgotPasswordScreen';
 
 export default function ForgotPasswordRoute() {
   const router = useRouter();
@@ -10,16 +10,15 @@ export default function ForgotPasswordRoute() {
       onNavigate={(screen, params) => {
         if (screen === 'otp') {
           router.push({
-            pathname: '/otp',
+            pathname: '/auth/otp',
             params,
           });
         } else if (screen === 'login') {
-          router.replace('/');
+          router.replace('/auth');
         }
       }}
       onBack={() => router.back()}
     />
   );
 }
-
 

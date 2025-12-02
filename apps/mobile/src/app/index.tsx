@@ -1,21 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'expo-router';
-import { AuthScreen } from '../screens/AuthScreen';
+import { useAuthContext } from '../context/AuthContext';
 
 export default function Index() {
   const router = useRouter();
+  const { userToken, isLoading } = useAuthContext();
 
-  return (
-    <AuthScreen
-      onForgotPassword={() => router.push('/forgot-password')}
-      onSignupSuccess={(email) =>
-        router.push({
-          pathname: '/otp',
-          params: { email, reason: 'signup-verification' },
-        })
-      }
-    />
-  );
+  useEffect(() => {
+    if (isLoading) return;
+
+    if (userToken) {
+      router.replace('/dashboard');
+    } else {
+      router.replace('/auth');
+    }
+  }, [userToken, isLoading]);
+
+  return null;
 }
 
 

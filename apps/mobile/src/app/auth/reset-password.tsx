@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ResetPasswordScreen } from '../screens/ResetPasswordScreen';
+import { ResetPasswordScreen } from '../../screens/ResetPasswordScreen';
 
 type ResetParams = {
   email?: string | string[];
@@ -20,11 +20,10 @@ export default function ResetPasswordRoute() {
       otp={otpValue ?? ''}
       onNavigate={(screen) => {
         if (screen === 'login') {
-          router.replace('/');
+          router.replace('/auth');
         }
       }}
     />
   );
 }
-
 
