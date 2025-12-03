@@ -288,7 +288,15 @@ jobs:
             cd ${{ steps.preview.outputs.id }}
 
             # Prepare .env from template using generator script
-            if [ -f "../.env.example" ] && [ -f "../generate-env-from-secrets.sh" ]; then
+            # Script and template are uploaded to /opt/maigie/previews/ in previous step
+            if [ -f "../.env.example" ] && [ -f "../scripts/generate-env-from-secrets.sh" ]; then
+              cp ../.env.example .env.example
+              cp ../scripts/generate-env-from-secrets.sh ./generate-env-from-secrets.sh
+              chmod +x ./generate-env-from-secrets.sh
+              export ENVIRONMENT="preview"
+              export PREVIEW_ID="${{ steps.preview.outputs.id }}"
+            elif [ -f "../.env.example" ] && [ -f "../generate-env-from-secrets.sh" ]; then
+              # Fallback: check if script was uploaded directly (without scripts/ directory)
               cp ../.env.example .env.example
               cp ../generate-env-from-secrets.sh ./generate-env-from-secrets.sh
               chmod +x ./generate-env-from-secrets.sh
