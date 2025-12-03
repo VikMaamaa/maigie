@@ -85,10 +85,7 @@ export const AuthScreen = ({ onForgotPassword, onSignupSuccess, onLoginSuccess }
   const handleGoogleAuth = async () => {
     try {
       await googleLogin();
-      // Note: onLoginSuccess should NOT be called here because googleLogin()
-      // only opens the browser - the actual OAuth authentication happens
-      // asynchronously. The onLoginSuccess callback should be triggered
-      // when the deep link handler receives the token from the OAuth callback.
+      onLoginSuccess();
     } catch {
       // Error handled in context
     }
