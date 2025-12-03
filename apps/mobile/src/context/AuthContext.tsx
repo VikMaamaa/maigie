@@ -150,7 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const verifyOtp = async (email: string, otp: string) => {
     setIsLoading(true);
     try {
-      const data = await api.post<{ access_token?: string }>(endpoints.auth.verifyOtp, { email, otp }, {
+      const data = await api.post<{ access_token?: string }>(endpoints.auth.verifyOtp, { email, code:otp }, {
         requiresAuth: false, // OTP verification doesn't require auth token
       });
       

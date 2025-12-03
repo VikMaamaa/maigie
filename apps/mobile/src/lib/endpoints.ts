@@ -29,7 +29,7 @@ export const endpoints = {
     signup: `${versionPrefix}/auth/signup`,
     logout: `${versionPrefix}/auth/logout`,
     forgotPassword: `${versionPrefix}/auth/reset-password`,
-    verifyOtp: `${versionPrefix}/auth/verify-otp`,
+    verifyOtp: `${versionPrefix}/auth/verify-email`,
     resendOtp: `${versionPrefix}/auth/resend-otp`,
     resetPassword: `${versionPrefix}/auth/change-password`,
     oauthAuthorize: (provider: string) => `${versionPrefix}/auth/oauth/${provider}/authorize`,
