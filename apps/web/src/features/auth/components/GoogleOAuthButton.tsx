@@ -22,8 +22,6 @@ export function GoogleOAuthButton({
         'w-full h-12 border-2 border-gray-300',
         'bg-white text-gray-700 font-medium',
         'flex items-center justify-center gap-3',
-        'hover:border-primary hover:text-primary',
-        'transition-colors duration-200',
         'focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2',
         (disabled || loading) && 'opacity-50 cursor-not-allowed',
         className
