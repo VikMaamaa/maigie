@@ -34,17 +34,27 @@ ListStr = Annotated[list[str], BeforeValidator(parse_list_value)]
 
 
 class Settings(BaseSettings):
+    # ... existing settings ...
+
+    # --- Email ---
+    SMTP_HOST: str | None = None
+    SMTP_PORT: int | None = None
+    SMTP_USER: str | None = None
+    SMTP_PASSWORD: str | None = None
+    EMAILS_FROM_EMAIL: str | None = None
+    EMAILS_FROM_NAME: str | None = None
+
     # --- Application Info ---
     APP_NAME: str = "Maigie API"
     APP_VERSION: str = "0.1.0"
     APP_DESCRIPTION: str = "AI-powered student companion API"  # <--- THIS WAS MISSING
-    DEBUG: bool = True
+    DEBUG: bool = False
     ENVIRONMENT: str = "development"
 
     # --- API & URLs ---
     API_V1_STR: str = "/api/v1"  # Renamed from API_V1_PREFIX to match auth.py
     ALLOWED_HOSTS: ListStr = ["localhost", "127.0.0.1"]
-    FRONTEND_BASE_URL: str = "http://localhost:3000"  # For OAuth redirects
+    FRONTEND_BASE_URL: str = ""  # For OAuth redirects
 
     # --- CORS ---
     CORS_ORIGINS: ListStr = [
@@ -67,6 +77,7 @@ class Settings(BaseSettings):
 
     # --- Redis Cache ---
     REDIS_URL: str = "redis://localhost:6379/0"
+
     REDIS_KEY_PREFIX: str = "maigie:"
     REDIS_SOCKET_TIMEOUT: int = 5
     REDIS_SOCKET_CONNECT_TIMEOUT: int = 5
@@ -79,9 +90,11 @@ class Settings(BaseSettings):
     # --- OAuth Providers (Placeholders) ---
     OAUTH_GOOGLE_CLIENT_ID: str | None = None
     OAUTH_GOOGLE_CLIENT_SECRET: str | None = None
-    OAUTH_GITHUB_CLIENT_ID: str | None = None
-    OAUTH_GITHUB_CLIENT_SECRET: str | None = None
-    # Redirect URI used by your teammate's OAuth logic
+    # TODO: Enable GitHub OAuth provider in the future
+    # OAUTH_GITHUB_CLIENT_ID: str | None = None
+    # OAUTH_GITHUB_CLIENT_SECRET: str | None = None
+    # Note: OAUTH_REDIRECT_URI is not used - redirect URI is dynamically constructed
+    # from request.base_url in the OAuth routes. This setting is kept for reference only.
     OAUTH_REDIRECT_URI: str = "http://localhost:8000/api/v1/auth/oauth/callback"
 
     # --- Celery (Background Workers) ---
